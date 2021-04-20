@@ -203,7 +203,7 @@ class TwoWheeledTrackEnv(Env):
         self.config = {"state_size": 3,
                        "input_size": 2,
                        "dt": 0.01,
-                       "max_step": 4000,
+                       "max_step": 3000,
                        "input_lower_bound": (-1.5, -3.14),
                        "input_upper_bound": (1.5, 3.14),
                        "car_size": 0.2,

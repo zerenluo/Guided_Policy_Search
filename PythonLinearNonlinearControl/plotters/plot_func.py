@@ -74,12 +74,21 @@ def plot_results(history_x, history_u, history_g=None, args=None):
                     name=env + "-input_history",
                     save_dir="./result/" + controller_type)
     else:
-        plot_result(history_x, history_g=history_g, ylabel="x",
-                    name=env + '-learning_' + "-state_history",
-                    save_dir="./result/" + controller_type)
-        plot_result(history_u, history_g=np.zeros_like(history_u), ylabel="u",
-                    name=env + '-learning_' + "-input_history",
-                    save_dir="./result/" + controller_type)
+        if args.relabel_with_expert:
+            plot_result(history_x, history_g=history_g, ylabel="x",
+                        name=env + '-learning_' + "Dagger" + "-state_history",
+                        save_dir="./result/" + controller_type)
+            plot_result(history_u, history_g=np.zeros_like(history_u), ylabel="u",
+                        name=env + '-learning_' + "Dagger" + "-input_history",
+                        save_dir="./result/" + controller_type)
+        else:
+            plot_result(history_x, history_g=history_g, ylabel="x",
+                        name=env + '-learning_' + "-state_history",
+                        save_dir="./result/" + controller_type)
+            plot_result(history_u, history_g=np.zeros_like(history_u), ylabel="u",
+                        name=env + '-learning_' + "-input_history",
+                        save_dir="./result/" + controller_type)
+
 
 
 def save_plot_data(history_x, history_u, history_g=None, cost=0, args=None):
@@ -115,21 +124,39 @@ def save_plot_data(history_x, history_u, history_g=None, cost=0, args=None):
                             env + "-cost.pkl")
         save_pickle(path, cost)
     else:
-        path = os.path.join("./result/" + controller_type,
-                            env + "learning" + "-history_x.pkl")
-        save_pickle(path, history_x)
+        if args.relabel_with_expert:
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "Dagger" + "-history_x.pkl")
+            save_pickle(path, history_x)
 
-        path = os.path.join("./result/" + controller_type,
-                            env + "learning" + "-history_u.pkl")
-        save_pickle(path, history_u)
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "Dagger" + "-history_u.pkl")
+            save_pickle(path, history_u)
 
-        path = os.path.join("./result/" + controller_type,
-                            env + "learning" + "-history_g.pkl")
-        save_pickle(path, history_g)
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "Dagger" + "-history_g.pkl")
+            save_pickle(path, history_g)
 
-        path = os.path.join("./result/" + controller_type,
-                            env + "learning" + "-cost.pkl")
-        save_pickle(path, cost)
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "Dagger" + "-cost.pkl")
+            save_pickle(path, cost)
+
+        else:
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "-history_x.pkl")
+            save_pickle(path, history_x)
+
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "-history_u.pkl")
+            save_pickle(path, history_u)
+
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "-history_g.pkl")
+            save_pickle(path, history_g)
+
+            path = os.path.join("./result/" + controller_type,
+                                env + "learning" + "-cost.pkl")
+            save_pickle(path, cost)
 
 
 def load_plot_data(env, controller_type, result_dir="./result"):

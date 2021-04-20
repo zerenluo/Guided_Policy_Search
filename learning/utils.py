@@ -31,7 +31,7 @@ def sample_trajectory(
 
         # TODO: policy here should be training policy, here plan a trajectory with training policy, input current state, return a series of actions along this trajectory
         u = policy.get_action(x)
-        u = u[0]       # take the first action, MPC fashion
+        # u = u[0]       # take the first action, MPC fashion. However, actually "get_action" of both MLPolicy and NMPCPolicy already give us the very first action
         us.append(u)
 
         # take that action and record results

@@ -25,6 +25,7 @@ class Animator():
             self.result_dir = args.result_dir
             self.controller_type = args.controller_type
             self.use_learning = args.use_learning
+            self.relabel_with_expert = args.relabel_with_expert
 
         self.interval = env.config["dt"] * 1000.  # to ms
         self.plot_func = env.plot_func
@@ -85,8 +86,12 @@ class Animator():
                                 "animation-" + self.env_name + ".mp4")
         else:
             # save animation
-            path = os.path.join(self.result_dir, self.controller_type,
-                                "animation-" + 'learning' + self.env_name + ".mp4")
+            if self.relabel_with_expert:
+                path = os.path.join(self.result_dir, self.controller_type,
+                                    "animation-" + 'Dagger' + 'learning' + self.env_name + ".mp4")
+            else:
+                path = os.path.join(self.result_dir, self.controller_type,
+                                    "animation-" + 'learning' + self.env_name + ".mp4")
 
         logger.info("Saved Animation to {} ...".format(path))
 

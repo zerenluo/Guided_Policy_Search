@@ -8,7 +8,7 @@ from typing import List
 import copy
 
 from learning.policy import MLPolicy
-from learning.policy import iLQRPolicy
+from learning.policy import NMPCCGMRESPolicy
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -34,7 +34,10 @@ class IL_trainer(object):
         self.env = make_env(params)
         self.IL = ILNetwork()
         self.collect_policy = MLPolicy(self.IL)
-        self.expert_policy = iLQRPolicy()
+        self.expert_policy = NMPCCGMRESPolicy()
+        self.x_training_data = np.zeros((1, 3), dtype=np.float32)
+        self.u_training_data = np.zeros((1, 2), dtype=np.float32)
+
 
     def collect_training_trajectories(self, itr:int,
                                       load_initial_expertdata_path: str,
@@ -42,7 +45,9 @@ class IL_trainer(object):
         paths: List[PathDict]
         print("\nCollecting data to be used for training...")
 
-        loaded_path: PathDict
+        loaded_path = PathDict(state=np.zeros((1, 3), dtype=np.float32),
+                               action=np.zeros((1, 2), dtype=np.float32),
+                               cost=0.)
         if itr == 0:
             load_initial_expertdata_state = os.path.join(load_initial_expertdata_path, "TwoWheeledTrack" + "-history_x.pkl")
             with open(load_initial_expertdata_state, 'rb') as paths_file_state:
@@ -76,14 +81,21 @@ class IL_trainer(object):
         print("\nRelabelling collected observations with labels from an expert policy...")
 
         # TODO relabel collected obsevations (from our policy) with labels from an expert policy
-        # HINT: query the policy (using the get_action function) with paths[i]["observation"]
+        # IDEA: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
         relabeled_paths: List[PathDict] = []
+
+
+
         for path in paths:
             relabeled_path = copy.deepcopy(path)
             for t, observation in enumerate(path['state']):
-                path['action'][t] = self.expert_policy.get_action(observation)
+                path['action'][t] = self.expert_policy.get_action(observation)[np.newaxis, :] # right hand side returns shape(1, input_size)
+                # print("\nGetting action from benchmark policy at time: ", t)
             relabeled_paths.append(relabeled_path)
+
+        print("relabeled paths len:", len(paths))
+        print("relabeled one path len:", paths[0]['state'].shape)
 
         return paths
 
@@ -112,13 +124,21 @@ class IL_trainer(object):
                 paths = self.do_relabel_with_expert(paths)
 
             # add collected data to replay buffer, simply consider the buffer could be infinite large
-        #     self.agent.add_to_replay_buffer(paths)
+            #     self.agent.add_to_replay_buffer(paths)
             for path in paths:
-                self.x_training_data = np.concatenate((self.x_training_data, path['state']))
-                self.u_training_data = np.concatenate((self.u_training_data, path['action']))
+                if itr == 0:
+                    self.x_training_data = path['state']
+                    self.u_training_data = path['action']
+
+                else:
+                    self.x_training_data = np.concatenate((self.x_training_data, path['state']), axis=0)
+                    self.u_training_data = np.concatenate((self.u_training_data, path['action']), axis=0)
+                    print("after dagger the shape of self.x_training_data:", self.x_training_data.shape)
+                    print("after dagger the shape of self.u_training_data:", self.u_training_data.shape)
+
 
             # train agent (using sampled data from replay buffer)
-            self.train_agent()  # HW1: implement this function below
+            self.train_agent()
 
 
     def train_agent(self):
@@ -130,12 +150,12 @@ class IL_trainer(object):
         #                       "TwoWheeledTrack" + "-history_u.pkl")
         #
         # with open(path_x, 'rb') as fo:
-        #     x_data = pickle.load(fo, encoding='bytes')
+        #     self.x_training_data = pickle.load(fo, encoding='bytes')
         #
         # with open(path_u, 'rb') as fo:
-        #     u_data = pickle.load(fo, encoding='bytes')
-        # print(x_data.shape)
-        # print(u_data.shape)
+        #     self.u_training_data = pickle.load(fo, encoding='bytes')
+        # print(self.x_training_data.shape)
+        # print(self.u_training_data.shape)
 
         # start the training process
         batch_size = 128
@@ -203,30 +223,30 @@ def main():
     parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
     parser.add_argument("--result_dir", type=str, default="./result")
     parser.add_argument("--use_learning", type=str, default=True)
-    parser.add_argument("--num_train_steps_per_iter", type=str, default=50000)
-    # parser.add_argument("--traj_steps", type=str, default=2000)
+    parser.add_argument("--num_train_steps_per_iter", type=str, default=120000)
+    parser.add_argument("--relabel_with_expert", type=str, default=False)
 
     args = parser.parse_args()
 
     trainer = IL_trainer(args)
     initial_expertdata_path = os.path.join("./result/" + "NMPCCGMRES")
 
-    config = make_config(args)
-    traj_steps = config["max_step"] # make sure that the sampled trajectory length is the same as the initial training trajectory length
+    # config = make_config(args)
+    traj_steps = trainer.env.config["max_step"] # make sure that the sampled trajectory length is the same as the initial training trajectory length
 
-    trainer.run_training_loop(n_iter=1, initial_expertdata=initial_expertdata_path, relabel_with_expert=True,
+    trainer.run_training_loop(n_iter=1, initial_expertdata=initial_expertdata_path, relabel_with_expert=args.relabel_with_expert,
                               start_relabel_with_expert=1, traj_steps=traj_steps)
 
     print('Finish training ...')
 
     # still testing, need to refactor
     make_logger(args.result_dir)
-    # config = make_config(args)
+    config = make_config(args)
     planner = make_planner(args, config)
 
-    history_x, history_u, history_g = trainer.run(planner)
+    history_x, history_u, history_g, cost = trainer.run(planner)
     plot_results(history_x, history_u, history_g=history_g, args=args)
-    save_plot_data(history_x, history_u, history_g=history_g, args=args)
+    save_plot_data(history_x, history_u, history_g=history_g, cost=cost, args=args)
 
     if args.save_anim:
         animator = Animator(env=trainer.env, args=args)

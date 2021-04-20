@@ -2,12 +2,11 @@ import numpy as np
 from learning.tf_utils import ILNetwork
 
 # the env, config, planner all for CartPole and iLQR case
-from PythonLinearNonlinearControl.envs.cartpole import CartPoleEnv
-from PythonLinearNonlinearControl.configs.cartpole import CartPoleConfigModule
-from PythonLinearNonlinearControl.planners.const_planner import ConstantPlanner
-from PythonLinearNonlinearControl.models.cartpole import CartPoleModel
-from PythonLinearNonlinearControl.controllers.ilqr import iLQR
-
+from PythonLinearNonlinearControl.envs.two_wheeled import TwoWheeledTrackEnv
+from PythonLinearNonlinearControl.configs.two_wheeled import TwoWheeledExtendConfigModule
+from PythonLinearNonlinearControl.planners.closest_point_planner import ClosestPointPlanner
+from PythonLinearNonlinearControl.models.two_wheeled import TwoWheeledModel
+from PythonLinearNonlinearControl.controllers.nmpc_cgmres import NMPCCGMRES
 
 # class BasePolicy(object):
 #     def get_action(self, obs: np.ndarray) -> np.ndarray:
@@ -19,16 +18,16 @@ class MLPolicy(object):
 
     def get_action(self, curr_x: np.ndarray) -> np.ndarray:
         # this get_action is used for sampling training trajectory; namely collect_policy
-        act = self.ILNet.forward(curr_x)
+        act = self.ILNet.forward(curr_x[np.newaxis, :]).reshape((2,))
         return act
 
-class iLQRPolicy(object):
+class NMPCCGMRESPolicy(object):
     def __init__(self):
-        self.env = CartPoleEnv()
-        self.config = CartPoleConfigModule()
-        self.planner = ConstantPlanner(self.config)
-        self.model = CartPoleModel(self.config)
-        self.controller = iLQR(self.config, self.model)
+        self.env = TwoWheeledTrackEnv()
+        self.config = TwoWheeledExtendConfigModule()
+        self.planner = ClosestPointPlanner(self.config)
+        self.model = TwoWheeledModel(self.config)
+        self.controller = NMPCCGMRES(self.config, self.model)
 
     def get_action(self, curr_x: np.ndarray) -> np.ndarray:
         # this get_action is used for relabelling the state explored by the trained policy

@@ -9,6 +9,8 @@ import copy
 
 from learning.policy import MLPolicy
 from learning.policy import NMPCCGMRESPolicy
+from learning.policy import iLQRPolicy
+
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -32,11 +34,17 @@ class IL_trainer(object):
     def __init__(self, params):
         self.params = params
         self.env = make_env(params)
-        self.IL = ILNetwork()
-        self.collect_policy = MLPolicy(self.IL)
-        self.expert_policy = NMPCCGMRESPolicy()
-        self.x_training_data = np.zeros((1, 3), dtype=np.float32)
-        self.u_training_data = np.zeros((1, 2), dtype=np.float32)
+        self.IL = ILNetwork(params)
+        self.collect_policy = MLPolicy(self.IL, params)
+
+        if self.params.env == "CartPole":
+            self.expert_policy = iLQRPolicy()
+
+        elif self.params.env == "TwoWheeledTrack":
+            self.expert_policy = NMPCCGMRESPolicy()
+
+        self.x_training_data = np.zeros((1, self.env.config['state_size']), dtype=np.float32)
+        self.u_training_data = np.zeros((1, self.env.config['input_size']), dtype=np.float32)
 
 
     def collect_training_trajectories(self, itr:int,
@@ -45,21 +53,22 @@ class IL_trainer(object):
         paths: List[PathDict]
         print("\nCollecting data to be used for training...")
 
-        loaded_path = PathDict(state=np.zeros((1, 3), dtype=np.float32),
-                               action=np.zeros((1, 2), dtype=np.float32),
+        loaded_path = PathDict(state=np.zeros((1, self.env.config['state_size']), dtype=np.float32),
+                               action=np.zeros((1, self.env.config['input_size']), dtype=np.float32),
                                cost=0.)
+
         if itr == 0:
-            load_initial_expertdata_state = os.path.join(load_initial_expertdata_path, "TwoWheeledTrack" + "-history_x.pkl")
+            load_initial_expertdata_state = os.path.join(load_initial_expertdata_path, self.params.env + "-history_x.pkl")
             with open(load_initial_expertdata_state, 'rb') as paths_file_state:
                 loaded_path_state = pickle.load(paths_file_state)
                 loaded_path['state'] = loaded_path_state
 
-            load_initial_expertdata_action = os.path.join(load_initial_expertdata_path, "TwoWheeledTrack" + "-history_u.pkl")
+            load_initial_expertdata_action = os.path.join(load_initial_expertdata_path, self.params.env + "-history_u.pkl")
             with open(load_initial_expertdata_action, 'rb') as paths_file_action:
                 loaded_path_action = pickle.load(paths_file_action)
                 loaded_path['action'] = loaded_path_action
 
-            load_initial_expertdata_cost = os.path.join(load_initial_expertdata_path, "TwoWheeledTrack" + "-cost.pkl")
+            load_initial_expertdata_cost = os.path.join(load_initial_expertdata_path, self.params.env + "-cost.pkl")
             with open(load_initial_expertdata_cost, 'rb') as paths_file_cost:
                 loaded_path_cost = pickle.load(paths_file_cost)
                 loaded_path['cost'] = loaded_path_cost
@@ -84,8 +93,6 @@ class IL_trainer(object):
         # IDEA: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
         relabeled_paths: List[PathDict] = []
-
-
 
         for path in paths:
             relabeled_path = copy.deepcopy(path)
@@ -136,27 +143,11 @@ class IL_trainer(object):
                     print("after dagger the shape of self.x_training_data:", self.x_training_data.shape)
                     print("after dagger the shape of self.u_training_data:", self.u_training_data.shape)
 
-
             # train agent (using sampled data from replay buffer)
             self.train_agent()
 
 
     def train_agent(self):
-        # # load the training data from NMPC controller solution
-        # path_x = os.path.join("./result/" + "NMPCCGMRES",
-        #                       "TwoWheeledTrack" + "-history_x.pkl")
-        #
-        # path_u = os.path.join("./result/" + "NMPCCGMRES",
-        #                       "TwoWheeledTrack" + "-history_u.pkl")
-        #
-        # with open(path_x, 'rb') as fo:
-        #     self.x_training_data = pickle.load(fo, encoding='bytes')
-        #
-        # with open(path_u, 'rb') as fo:
-        #     self.u_training_data = pickle.load(fo, encoding='bytes')
-        # print(self.x_training_data.shape)
-        # print(self.u_training_data.shape)
-
         # start the training process
         batch_size = 128
         for training_step in range(self.params.num_train_steps_per_iter):
@@ -194,8 +185,7 @@ class IL_trainer(object):
             g_xs = planner.plan(curr_x, info["goal_state"])
 
             # obtain sol
-            # u = controller.obtain_sol(curr_x)
-            u = self.IL.forward(curr_x[np.newaxis, :]).reshape((2,))
+            u = self.IL.forward(curr_x[np.newaxis, :]).reshape((self.env.config['input_size'],))
 
             # step
             next_x, cost, done, info = self.env.step(u)
@@ -218,18 +208,23 @@ class IL_trainer(object):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--env", type=str, default="TwoWheeledTrack")
+    # parser.add_argument("--env", type=str, default="TwoWheeledTrack")
+    parser.add_argument("--env", type=str, default="CartPole")
+
     parser.add_argument("--save_anim", type=bool_flag, default=1)
-    parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
+    # parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
+    parser.add_argument("--controller_type", type=str, default="MPPI")
+
     parser.add_argument("--result_dir", type=str, default="./result")
     parser.add_argument("--use_learning", type=str, default=True)
-    parser.add_argument("--num_train_steps_per_iter", type=str, default=120000)
-    parser.add_argument("--relabel_with_expert", type=str, default=False)
+    parser.add_argument("--num_train_steps_per_iter", type=str, default=100000)
+    parser.add_argument("--relabel_with_expert", type=str, default=True)
 
     args = parser.parse_args()
 
     trainer = IL_trainer(args)
-    initial_expertdata_path = os.path.join("./result/" + "NMPCCGMRES")
+    initial_expertdata_path = os.path.join(args.result_dir + '/' + args.controller_type)
+    print('Running rl_trainer for {0} with controller type {1}'.format(args.env, args.controller_type))
 
     # config = make_config(args)
     traj_steps = trainer.env.config["max_step"] # make sure that the sampled trajectory length is the same as the initial training trajectory length

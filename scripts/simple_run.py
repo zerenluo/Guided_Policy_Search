@@ -40,11 +40,12 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
-    parser.add_argument("--env", type=str, default="TwoWheeledTrack")
+    parser.add_argument("--controller_type", type=str, default="MPPI")
+    parser.add_argument("--env", type=str, default="CartPole")
     parser.add_argument("--save_anim", type=bool_flag, default=0)
     parser.add_argument("--result_dir", type=str, default="./result")
     parser.add_argument("--use_learning", type=str, default=False)
+    parser.add_argument("--relabel_with_expert", type=str, default=False)
 
 
     args = parser.parse_args()

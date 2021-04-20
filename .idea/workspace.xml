@@ -25,17 +25,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d184ccec-7f52-4c5c-b62a-9ef119fad74f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/PythonLinearNonlinearControl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PythonLinearNonlinearControl.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/two_wheeled.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/two_wheeled.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/animator.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/animator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/plot_func.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/plot_func.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/learning/policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/policy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/learning/rl_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/rl_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/learning/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning/tf_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/tf_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/simple_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/simple_run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -129,7 +122,7 @@
       <workItem from="1618911057745" duration="3628000" />
       <workItem from="1618914708780" duration="1097000" />
       <workItem from="1618920947760" duration="566000" />
-      <workItem from="1618921521481" duration="10106000" />
+      <workItem from="1618921521481" duration="16544000" />
     </task>
     <servers />
   </component>

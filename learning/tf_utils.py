@@ -1,25 +1,28 @@
 import numpy as np
 import tensorflow as tf
+from PythonLinearNonlinearControl.envs.make_envs import make_env
+
 
 class ILNetwork(object):
-    def __init__(self):
+    def __init__(self, params):
         self.sess = tf.Session()
         # build net and initialize variables when instantiate this class
+        self.env = make_env(params)
         self.build_net()
         self.sess.run(tf.global_variables_initializer())
 
     def build_net(self):
         # create input
-        self.input_r = tf.placeholder(dtype=tf.float32, shape=[None, 3], name='state')  # 4 for cartpole
-        self.output_r = tf.placeholder(dtype=tf.float32, shape=[None, 2], name='value') # output is a 1 dimension variable
+        self.input_r = tf.placeholder(dtype=tf.float32, shape=[None, self.env.config['state_size']], name='state')
+        self.output_r = tf.placeholder(dtype=tf.float32, shape=[None, self.env.config['input_size']], name='action')
 
         # create variables
-        with tf.variable_scope('cartpole_net'):
+        with tf.variable_scope('controller_net'):
             n_l1, n_l2, n_l3, w_initializer, b_initializer = 64, 128, 64,\
                 tf.random_normal_initializer(0., 0.3), tf.constant_initializer(0.1)
 
             with tf.variable_scope('l_input'):
-                w0 = tf.get_variable('w0', [3, n_l1], initializer=w_initializer)
+                w0 = tf.get_variable('w0', [self.env.config['state_size'], n_l1], initializer=w_initializer)
                 b0 = tf.get_variable('b0', [1, n_l1], initializer=b_initializer)
                 l0 = tf.nn.tanh(tf.matmul(self.input_r, w0) + b0)
 
@@ -34,8 +37,8 @@ class ILNetwork(object):
                 l2 = tf.nn.tanh(tf.matmul(l1, w2) + b2)
 
             with tf.variable_scope('l_output'):
-                w3 = tf.get_variable('w3', [n_l3, 2], initializer=w_initializer)
-                b3 = tf.get_variable('b3', [1, 2], initializer=b_initializer)
+                w3 = tf.get_variable('w3', [n_l3, self.env.config['input_size']], initializer=w_initializer)
+                b3 = tf.get_variable('b3', [1, self.env.config['input_size']], initializer=b_initializer)
                 self.output_pred = tf.matmul(l2, w3) + b3
 
         # create loss

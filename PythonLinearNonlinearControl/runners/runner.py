@@ -24,7 +24,7 @@ class ExpRunner():
         """
         done = False
         curr_x, info = env.reset()
-        history_x, history_u, history_g = [], [], []
+        history_x, history_u, history_g = [], [], []             # this is the one sampled trajectory
         step_count = 0
         total_cost = 0.
 

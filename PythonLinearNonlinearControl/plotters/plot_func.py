@@ -66,7 +66,7 @@ def plot_results(history_x, history_u, history_g=None, args=None):
         controller_type = args.controller_type
 
 
-    if not args.use_learning:
+    if not args.use_learning: # expert policy, history_x, history_u, history_g are all list now
         plot_result(history_x, history_g=history_g, ylabel="x",
                     name=env + "-state_history",
                     save_dir="./result/" + controller_type)

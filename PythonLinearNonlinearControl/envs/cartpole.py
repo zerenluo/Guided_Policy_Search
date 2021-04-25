@@ -20,8 +20,8 @@ class CartPoleEnv(Env):
         """
         self.config = {"state_size": 4,
                        "input_size": 1,
-                       "dt": 0.01,
-                       "max_step": 1000,
+                       "dt": 0.02,
+                       "max_step": 500,
                        "input_lower_bound": [-3.],
                        "input_upper_bound": [3.],
                        "mp": 0.2,
@@ -42,8 +42,16 @@ class CartPoleEnv(Env):
         """
         self.step_count = 0
 
-        theta = np.random.randn(1)
-        self.curr_x = np.array([0., 0., theta[0], 0.])
+        theta_init = np.float(np.random.randn(1))
+        # self.curr_x = np.array([0., 0., theta[0], 0.])
+
+        # x_init = np.float(2 * np.random.rand(1) - 1)
+        x_init = np.float(np.random.randn(1))
+        # self.curr_x = np.array([x_init, 0., -np.pi, 0.])
+        self.curr_x = np.array([x_init, 0., theta_init, 0.])
+
+        print("Initial x position is: ", x_init)
+
 
         if init_x is not None:
             self.curr_x = init_x

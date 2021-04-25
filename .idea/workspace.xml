@@ -25,8 +25,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d184ccec-7f52-4c5c-b62a-9ef119fad74f" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/learning/policy_gradient/try.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/learning/policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/policy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/cartpole.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/cartpole.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/two_wheeled.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/envs/two_wheeled.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/plot_func.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/plotters/plot_func.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PythonLinearNonlinearControl/runners/runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/PythonLinearNonlinearControl/runners/runner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/learning/rl_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/rl_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/learning/tf_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/learning/tf_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/simple_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/simple_run.py" afterDir="false" />
@@ -66,14 +70,14 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/CS285/cs285-homework/hw1" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.try">
     <configuration name="rl_trainer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PythonLinearNonlinearControl" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -96,8 +100,31 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="try" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="PythonLinearNonlinearControl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/learning/policy_gradient" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/learning/policy_gradient/try.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.try" />
         <item itemvalue="Python.rl_trainer" />
       </list>
     </recent_temporary>
@@ -122,7 +149,9 @@
       <workItem from="1618911057745" duration="3628000" />
       <workItem from="1618914708780" duration="1097000" />
       <workItem from="1618920947760" duration="566000" />
-      <workItem from="1618921521481" duration="16544000" />
+      <workItem from="1618921521481" duration="23893000" />
+      <workItem from="1619012012064" duration="1215000" />
+      <workItem from="1619035005627" duration="21270000" />
     </task>
     <servers />
   </component>
@@ -142,6 +171,7 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Guided_Policy_Search$try.coverage" NAME="try Coverage Results" MODIFIED="1619098196942" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learning/policy_gradient" />
     <SUITE FILE_PATH="coverage/PythonLinearNonlinearControl$rl_trainer.coverage" NAME="rl_trainer Coverage Results" MODIFIED="1618522392915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/learning" />
   </component>
 </project>

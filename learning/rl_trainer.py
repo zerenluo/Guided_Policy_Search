@@ -57,21 +57,26 @@ class IL_trainer(object):
                                action=np.zeros((1, self.env.config['input_size']), dtype=np.float32),
                                cost=0.)
 
-        if itr == 0:
+        # loaded_paths: List[PathDict]
+        if itr == 0: # for behavioral cloning or the initilizatin of Dagger
             load_initial_expertdata_state = os.path.join(load_initial_expertdata_path, self.params.env + "-history_x.pkl")
             with open(load_initial_expertdata_state, 'rb') as paths_file_state:
-                loaded_path_state = pickle.load(paths_file_state)
-                loaded_path['state'] = loaded_path_state
+                loaded_paths_state = pickle.load(paths_file_state)             # what is loaded is a list of array
+                print("{} sampled trajectories in total: ".format(len(loaded_paths_state)))
+                state_array = np.array(loaded_paths_state).reshape([-1,self.env.config['state_size']])  # change to array and concantenate
+                loaded_path['state'] = state_array
 
             load_initial_expertdata_action = os.path.join(load_initial_expertdata_path, self.params.env + "-history_u.pkl")
             with open(load_initial_expertdata_action, 'rb') as paths_file_action:
-                loaded_path_action = pickle.load(paths_file_action)
-                loaded_path['action'] = loaded_path_action
+                loaded_paths_action = pickle.load(paths_file_action)
+                action_array = np.array(loaded_paths_action).reshape([-1,self.env.config['input_size']])
+                loaded_path['action'] = action_array
 
             load_initial_expertdata_cost = os.path.join(load_initial_expertdata_path, self.params.env + "-cost.pkl")
             with open(load_initial_expertdata_cost, 'rb') as paths_file_cost:
-                loaded_path_cost = pickle.load(paths_file_cost)
-                loaded_path['cost'] = loaded_path_cost
+                loaded_paths_cost = pickle.load(paths_file_cost)
+                cost_array = np.array(loaded_paths_cost)
+                loaded_path['cost'] = cost_array
 
             paths = [loaded_path] # there is only one loaded expert path
         else:
@@ -144,13 +149,13 @@ class IL_trainer(object):
                     print("after dagger the shape of self.u_training_data:", self.u_training_data.shape)
 
             # train agent (using sampled data from replay buffer)
-            self.train_agent()
+            self.train_agent(itr)
 
 
-    def train_agent(self):
+    def train_agent(self, itr):
         # start the training process
-        batch_size = 128
-        for training_step in range(self.params.num_train_steps_per_iter):
+        batch_size = 512
+        for training_step in range(self.params.num_train_steps_per_iter[itr]):
             # get the subset of the training datas
             indices = np.random.randint(low=0, high=len(self.x_training_data), size=batch_size)
             input_batch = self.x_training_data[indices]
@@ -159,7 +164,7 @@ class IL_trainer(object):
             # TODO: use the train function in tf.utils: ILNetwork
             loss = self.IL.learn(input_batch, output_batch)
 
-            if training_step % 1000 == 0:
+            if training_step % 2000 == 0:
                 # print('training steps: ', training_step)
                 print('training steps: {0: 04d}loss: {1:.5f}'.format(training_step, loss))
 
@@ -174,6 +179,7 @@ class IL_trainer(object):
 
         done = False
         curr_x, info = self.env.reset()
+        # self.env.curr_x = np.array([0., 0., -np.pi, 0.])
         # print(curr_x.shape)
         history_x, history_u, history_g = [], [], []
         step_count = 0
@@ -193,6 +199,7 @@ class IL_trainer(object):
             # save
             history_u.append(u)
             history_x.append(curr_x)
+            # print("curr_x in trainer run: ", curr_x)
             history_g.append(g_xs[0])
 
             # update
@@ -208,28 +215,28 @@ class IL_trainer(object):
 def main():
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument("--env", type=str, default="TwoWheeledTrack")
-    parser.add_argument("--env", type=str, default="CartPole")
+    parser.add_argument("--env", type=str, default="TwoWheeledTrack")
+    # parser.add_argument("--env", type=str, default="CartPole")
 
     parser.add_argument("--save_anim", type=bool_flag, default=1)
-    # parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
-    parser.add_argument("--controller_type", type=str, default="MPPI")
+    parser.add_argument("--controller_type", type=str, default="NMPCCGMRES")
+    # parser.add_argument("--controller_type", type=str, default="MPPI")
 
     parser.add_argument("--result_dir", type=str, default="./result")
     parser.add_argument("--use_learning", type=str, default=True)
-    parser.add_argument("--num_train_steps_per_iter", type=str, default=100000)
+    parser.add_argument("--num_train_steps_per_iter", type=np.ndarray, default=[40000, 80000, 120000, 160000])
     parser.add_argument("--relabel_with_expert", type=str, default=True)
 
     args = parser.parse_args()
 
     trainer = IL_trainer(args)
     initial_expertdata_path = os.path.join(args.result_dir + '/' + args.controller_type)
-    print('Running rl_trainer for {0} with controller type {1}'.format(args.env, args.controller_type))
+    print('Running rl_trainer for {0} with controller type {1} \n Using Dagger: {2}'.format(args.env, args.controller_type, args.relabel_with_expert))
 
     # config = make_config(args)
     traj_steps = trainer.env.config["max_step"] # make sure that the sampled trajectory length is the same as the initial training trajectory length
 
-    trainer.run_training_loop(n_iter=1, initial_expertdata=initial_expertdata_path, relabel_with_expert=args.relabel_with_expert,
+    trainer.run_training_loop(n_iter=4, initial_expertdata=initial_expertdata_path, relabel_with_expert=args.relabel_with_expert,
                               start_relabel_with_expert=1, traj_steps=traj_steps)
 
     print('Finish training ...')
@@ -245,6 +252,7 @@ def main():
 
     if args.save_anim:
         animator = Animator(env=trainer.env, args=args)
+        print("first in history_x", history_x[0])
         animator.draw(history_x, history_g)
 
 

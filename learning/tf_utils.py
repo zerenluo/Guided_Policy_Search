@@ -47,7 +47,7 @@ class ILNetwork(object):
 
         # create optimizer
         with tf.variable_scope('train'):
-            self.train_op = tf.train.AdamOptimizer(learning_rate=0.002).minimize(self.loss)  # learning rate could be set in the first bracket
+            self.train_op = tf.train.AdamOptimizer(learning_rate=0.001).minimize(self.loss)  # learning rate could be set in the first bracket
 
     def forward(self, inputs):
         output_pred = self.sess.run(self.output_pred, feed_dict={self.input_r: inputs} )
